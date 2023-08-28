@@ -4,7 +4,7 @@ The following project is what I used to participate and eventually win in the na
 # Overview
 The model file takes in some of the columns specified in the dataset present inside the assets folder and then trains a model according to it.
 
-The main file then takes various inputs from the test_file.csv and then returns the predictd score after 6 overs given an inning. 
+The main file then takes various inputs from the test_file.csv and then returns the predicted score after 6 overs given an inning. 
 
 # What algorithm is used? 
 Random forest regression, provided by the scikit-learn package is used to find the score of any given team. 

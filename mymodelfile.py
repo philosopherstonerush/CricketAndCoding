@@ -6,6 +6,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OrdinalEncoder
 
 class MyModel():
+    """
+    
+    We can't do regression analysis with string, we must convert them to a numeric value. To do that we use OrdinalEncoder. We subsitute -1 if its unknown.
+
+    The regression algorithm used here is random forest regression - it uses multiple regression methods to find the best possible prediction.
+
+    """
+
     batter_encode = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
     bowler_encode = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
     batting_team_encode = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
@@ -16,11 +24,26 @@ class MyModel():
         return None
     
     def fit(self, input):
+        """
+        
+        input - check out the main file, it is two file's data. input[0] gives us every information other than venue while input[1] gives us that.  
+
+        """
+
+
         dataset = input[0]
         venue = input[1]
+
+        # iloc[rows, columns] - I want all the rows from 0th and 7th column
         venue = venue.iloc[:, [0, 7]]
+
+        # merge all relevant info
         df = pd.merge(dataset, venue, how="outer", on="ID")
+
+        # drop irrelevant info
         df = df.drop(["ballnumber", 'non-striker', 'extra_type', 'batsman_run', 'extras_run', 'non_boundary', 'isWicketDelivery', 'player_out', 'kind', 'fielders_involved'], axis=1)
+
+        # filtering only overs that are less than or equal to 6.
         df = df[df['overs'] <=6]
         df = df.drop(['overs'], axis=1)
 
@@ -29,7 +52,12 @@ class MyModel():
         df = df.drop_duplicates()
         df = pd.merge(df, df_new, on=['ID', 'innings'], how='left')
 
-        
+        # fit - trains the model with the data. For example - it understands or maps - "football" to 1.
+
+        # transform - converts football in the dataset to 1
+
+        # fit-transform - does both
+
         batter_encoded = self.batter_encode.fit_transform(df["batter"].values.reshape(-1, 1))
         df["batter"] = batter_encoded
         bowler_encoded = self.bowler_encode.fit_transform(df["bowler"].values.reshape(-1, 1))
@@ -54,8 +82,11 @@ class MyModel():
 
     def predict(self, test_file):
         test_file = test_file.drop(["bowling_team"], axis=1)
+        
         test_file = test_file.assign(batsmen=test_file['batsmen'].str.split(', ')).explode('batsmen')
         test_file = test_file.assign(bowlers=test_file['bowlers'].str.split(', ')).explode('bowlers')
+
+        # We don't have to train them, just have to convert them. 
         test_file["venue"] = self.ven_encode.transform(test_file["venue"].values.reshape(-1, 1))
         test_file["batting_team"] = self.batting_team_encode.transform(test_file["batting_team"].values.reshape(-1, 1))
         test_file["batsmen"] = self.batter_encode.transform(test_file["batsmen"].values.reshape(-1, 1))
